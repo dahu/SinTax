@@ -1,0 +1,8 @@
+SinTax
+------
+
+__Parsing with regular expressions yields SinTax__
+
+SinTax is a DSL for generating Vim __syntax highlighting__ files.
+
+*Status:* design & development

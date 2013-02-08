@@ -1,0 +1,86 @@
+" Vim syntax plugin for filetype name.
+" Maintainer:	Barry Arthur <barry.arthur@gmail.com>
+" 		Israel Chauca F. <israelchauca@gmail.com>
+" Version:	0.1
+" Description:	Long description.
+" Last Change:	2013-02-01
+" License:	Vim License (see :help license)
+" Location:	syntax/vrs.vim
+" Website:	https://github.com/Raimondi/vrs
+
+name    vrs
+case    ignore
+spell   default
+
+keyword vrsTodo    .Todo : TODO FIXME XXX
+
+partial token \S\+\s\+
+
+partial separator
+    \%(
+      \\}          # an escaped \}
+    \|             # or
+      [^}]         # anything but a }
+    \)
+
+match vrsNameErr   .Error      contained : ^\%{token}
+
+match vrsName      .Identifier contained : ^\w\+\s\+
+
+match vrsFlavorErr .Error      contained
+  \%(
+    ^\%{token}     # if the line starts with a token
+  \)\@<=           #   before
+  \%{token}        # a token
+
+match vrsFlavor    .Type       contained
+  \%(
+    ^\%{token}     # if the line starts with a token
+  \)\@<=           #   before
+  \%{vrsName}      # a vrsName
+
+match vrsCompItem  .Normal     contained
+    \w\+           # a word
+  \|               # or
+    \d\+           # a number
+  \|               # or
+    ,\@<=          # a separator if proceeded by a comma
+    \%{separator}\+
+
+" match a composition atom: \%{pattern-name,count,separator}
+match vrsCompose   .PreProc    contained contains=vrsCompItem
+  \\%{             # a literal \{
+    \S\+           # a word   (pattern-name)
+    ,              # a comma
+    \d\+           # a number (count)
+    ,              # a comma
+    \%{separator}* # an optional separator
+  }                # and a literal }
+
+match vrsRegExp    .String     contains=vrsCompose contained
+  \%(
+    ^\%{token,2}   # if the line starts with two tokens
+  \)\@<=               before
+  .*               # anything
+
+match vrsCommand              contains=vrsName,vrsFlavor,vrsNameErr,vrsFlavorErr,vrsRegExp,vrsComment
+  ^\{%token,2}\S.* # a line with three 'tokens' minimum
+
+match vrsContinued .String     contains=vrsComment
+  ^\s\+\S.*        # a line with leading whitespace and a 'token'
+
+match vrsComment   .Comment    containedin=ALL contains=vrsTodo
+  \%(              # as long as
+    \%(
+      \\ \\        #   (ignoring any number of double backslashes (\\))
+    \)*
+    \\             #   a backslash
+  \)\@<!           # doesn't precede
+  #.*$             # a literal # followed by anything
+
+match vrsError     .Error
+  ^                # any line starting with
+  [^a-zA-Z0-9_#\ ] # anything that's not alphanumeric, underscore, hash or a space
+  .*               # and anything afterwards
+
+match vrsError     .Error : foo
