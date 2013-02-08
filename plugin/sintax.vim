@@ -102,7 +102,12 @@ function! Sintax(...)
       endif
       " TODO: testing only
       call self.passthrough(line)
+
+      " are we still in the same sintax block?
       let self.curline += 1
+      if self.curline >= self.eof
+        break
+      endif
       let line = self.input[self.curline]
       " return to outer level parser if input is back at the left edge
       if line =~ '^\S'
@@ -123,7 +128,7 @@ endfunc
 " test
 
 let sinner = Sintax()
-echo sinner.parse('zuishui_2.zs')
+echo sinner.parse('vrs.sintax')
 
 finish
 
