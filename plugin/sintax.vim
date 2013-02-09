@@ -90,18 +90,56 @@ function! Sintax(...)
     return self.output()
   endfunc
 
+  func sin.process_name() dict
+    echo "processing name!"
+    return ['matched']
+  endfunc
+
+  func sin.process_case() dict
+    echo "processing case!"
+    return ['matched']
+  endfunc
+
+  func sin.process_spell() dict
+    echo "processing spell!"
+    return ['matched']
+  endfunc
+
+  func sin.process_keyword() dict
+    echo "processing keyword!"
+    return ['matched']
+  endfunc
+
+  func sin.process_partial() dict
+    echo "processing partial!"
+    return ['matched']
+  endfunc
+
+  func sin.process_match() dict
+    echo "processing match!"
+    return ['matched']
+  endfunc
+
+  func sin.process_region() dict
+    echo "processing region!"
+    return ['matched']
+  endfunc
+
   "TODO: this is where the magic happens
   "  now we have a logically whole sintax block in self.sinline
   "  determine the type of line and throw to its processor, returning the
   "  expanded text for output in the flush command
   func sin.process_sintax_block()
-    return self.sinline
+    let type = matchstr(self.sinline[0], '^\w\+')
+    return call(eval('self.process_' . type), [], self)
   endfunc
 
   func sin.flush_old_sintax_line()
-    call extend(self.out, ['>>>>>>>---'])
-    call extend(self.out, self.process_sintax_block())
-    call extend(self.out, ['---<<<<<<<'])
+    if ! empty(self.sinline)
+      call extend(self.out, ['>>>>>>>---'])
+      call extend(self.out, self.process_sintax_block())
+      call extend(self.out, ['---<<<<<<<'])
+    endif
   endfunc
 
   func sin.prepare_sintax_line() dict
