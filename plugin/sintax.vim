@@ -1,40 +1,56 @@
 
-" let [name, flavour, pattern] = ['', '', '']
-
 let erex = ExtendedRegexObject('SinLookup')
 function! SinLookup(name)
   " echo 'looking up ''' . a:name . ''''
-  " echo get(g:p, a:name)
   return get(s:p, a:name)
 endfunction
 
 let s:p = {}
-let s:p['word'] = '\%(\s\+\(\h\w\+\)\s*\)'
+let s:p['word'] = '\%(\s*\(\h\w\+\)\s*\)'
 let s:p['optword'] = s:p['word'] . '\?'
 let s:p['sintax_group_name'] = s:p['word']
 let s:p['highlight'] = '\%(\.' . s:p['word'] . '\)\?'
 let s:p['sinargs'] = '\([^:]*\)'
 let s:p['sintax_args'] = s:p['sintax_group_name'] . s:p['highlight'] . s:p['sinargs'] . '\%(:\(.*\)\)\?'
-let s:p['name_line'] = '^name' . s:p['word']
-let s:p['case_line'] = '^case' . s:p['word']
-let s:p['spell_line'] = '^spell' . s:p['word']
-let s:p['keyword_line'] = '^keyword' . s:p['sintax_args']
-let s:p['partial_line'] = '^partial' . s:p['sintax_group_name'] . '\(.*\)\?'
-let s:p['match_line'] = '^match' . s:p['sintax_args']
-let s:p['region_line'] = '^region' . s:p['sintax_args']
-" let s:p['sintax_line'] = erex.parse(
-"         \ '\%('
-"         \ . join(
-"         \   map(
-"         \     ['name', 'case', 'spell', 'keyword', 'partial', 'match', 'region'],
-"         \     '"\\%{" . v:val . "_line}"'),
-"         \   '\)\|\%(')
-"         \ . '\)')
+let s:p['name_line'] = '^name\s\+' . s:p['word']
+let s:p['case_line'] = '^case\s\+' . s:p['word']
+let s:p['spell_line'] = '^spell\s\+' . s:p['word']
+let s:p['keyword_line'] = '^keyword\s\+' . s:p['sintax_args']
+let s:p['partial_line'] = '^partial\s\+' . s:p['sintax_group_name'] . '\(.*\)\?'
+let s:p['match_line'] = '^match\s\+' . s:p['sintax_args']
+let s:p['region_line'] = '^region\s\+' . s:p['sintax_args']
 
 function! Sintax(...)
   let sin = {}
   let sin.out = []
+  let sin.highlights = []
+  let sin.patterns = {}
   let sin.sinline = []
+  let sin.preamble = join([
+        \  ''
+        \ ,'" Quit when a (custom) syntax file was already loaded'
+        \ ,'if exists("b:current_syntax")'
+        \ ,'  finish'
+        \ ,'endif'
+        \ ,''
+        \ ,'" Allow use of line continuation.'
+        \ ,'let s:save_cpo = &cpo'
+        \ ,'set cpo&vim'
+        \ ,''], "\n")
+  let sin.postamble = join([
+        \  'let b:current_syntax = "%name"'
+        \ ,''
+        \ ,'let &cpo = s:save_cpo'
+        \ ,'unlet s:save_cpo'
+        \ ,''
+        \ ,'" vim: set sw=2 sts=2 et fdm=marker:'], "\n")
+
+  func sin.lookup(name) dict
+    " echo 'looking up name="' . a:name . '", value="' . get(self.patterns, a:name) . '"'
+    return get(self.patterns, a:name)
+  endfunc
+
+  let sin.erex = ExtendedRegexObject(eval('sin.lookup'), sin)
 
   func sin.prepare_output() dict
     let self.out = []
@@ -46,13 +62,11 @@ function! Sintax(...)
 
   func sin.matches(string, pattern_name) dict
     let p = SinLookup(a:pattern_name)
-    " echo 'matches(' . a:string . ', ' . p . ')'
     return match(a:string, SinLookup(a:pattern_name)) != -1
   endfunc
 
   func sin.matchlist(string, pattern_name) dict
     let p = SinLookup(a:pattern_name)
-    " echo 'matchlist(' . a:string . ', ' . p . ')'
     return matchlist(a:string, SinLookup(a:pattern_name))
   endfunc
 
@@ -80,7 +94,9 @@ function! Sintax(...)
       let line = self.input[self.curline]
       " pass through blank, comment and explicit vim lines
       if self.is_blank_or_comment(line) || (! self.is_sin_line(line))
-        call self.passthrough(line)
+        if line != ''
+          call self.passthrough(line)
+        endif
         let self.curline += 1
         continue
       else
@@ -90,55 +106,98 @@ function! Sintax(...)
     return self.output()
   endfunc
 
-  func sin.process_name() dict
-    echo "processing name!"
-    return ['matched']
+  func sin.warn(msg) dict
+    echohl Warning
+    echo "Warning: " . a:msg
+    echohl None
   endfunc
 
-  func sin.process_case() dict
-    echo "processing case!"
-    return ['matched']
+  func sin.process_name(line) dict
+    let [_, name ;__] = matchlist(a:line, SinLookup('name_line'))
+    let self.postamble = substitute(self.postamble, '%name', name, 'g')
+    return []
   endfunc
 
-  func sin.process_spell() dict
-    echo "processing spell!"
-    return ['matched']
+  func sin.process_case(line) dict
+    let [_, case ;__] = matchlist(a:line, SinLookup('case_line'))
+    if case !~# 'match\|ignore'
+      self.warn("Unknown 'case' argument : " . case)
+    endif
+    return ['syntax case ' . case]
   endfunc
 
-  func sin.process_keyword() dict
-    echo "processing keyword!"
-    return ['matched']
+  func sin.process_spell(line) dict
+    let [_, spell ;__] = matchlist(a:line, SinLookup('spell_line'))
+    if spell !~# 'toplevel\|notoplevel\|default'
+      self.warn("Unknown 'spell' argument : " . case)
+    endif
+    return ['syntax spell ' . spell]
   endfunc
 
-  func sin.process_partial() dict
-    echo "processing partial!"
-    return ['matched']
+  func sin.process_sinargs(line) dict
+    let [_, _, name, highlight, args, pattern ;__] = matchlist(a:line, '^\(\w\+\)' . SinLookup('sintax_args'))
+    if pattern == ''
+      let pattern = escape(self.erex.parse(join(a:line[1:-1])), '/')
+    else
+      let pattern = escape(self.erex.parse(pattern), '/')
+    endif
+    return [name, highlight, args, pattern]
   endfunc
 
-  func sin.process_match() dict
-    echo "processing match!"
-    return ['matched']
+  func sin.highlight(name, link) dict
+    if a:link != ''
+      call extend(self.highlights, ['hi def link ' . a:name . ' ' . a:link])
+    endif
   endfunc
 
-  func sin.process_region() dict
-    echo "processing region!"
-    return ['matched']
+  func sin.process_keyword(line) dict
+    let [_, _, name, highlight, args, pattern ;__] = matchlist(a:line, '^\(\w\+\)' . SinLookup('sintax_args'))
+    call self.highlight(name, highlight)
+    return ['syntax keyword ' . join([name, pattern, args], ' ')]
   endfunc
 
-  "TODO: this is where the magic happens
-  "  now we have a logically whole sintax block in self.sinline
-  "  determine the type of line and throw to its processor, returning the
-  "  expanded text for output in the flush command
+  func sin.process_partial(line) dict
+    let [_, name, pattern ;__] = matchlist(a:line, SinLookup('partial_line'))
+    if pattern == ''
+      let pattern = escape(self.erex.parse(join(a:line[1:-1])), '/')
+    else
+      let pattern = escape(self.erex.parse(pattern), '/')
+    endif
+    let self.patterns[name] = pattern
+    return []
+  endfunc
+
+  func sin.process_match(line) dict
+    let [name, highlight, args, pattern] = self.process_sinargs(a:line)
+    call self.highlight(name, highlight)
+    let self.patterns[name] = pattern
+    return ['syntax match ' . name . ' /' . pattern . '/ ' . args]
+  endfunc
+
+  " TODO: get region working
+" let s:p['match_line'] = '^match\s\+' . s:p['sintax_args']
+" let s:p['sintax_args'] = s:p['sintax_group_name'] . s:p['highlight'] . s:p['sinargs'] . '\%(:\(.*\)\)\?'
+  func sin.process_region(line) dict
+    let [name, highlight, args, pattern] = self.process_sinargs(a:line)
+    call self.highlight(name, highlight)
+    return ['syntax region ' . name . ' /' . pattern . '/ ' . args]
+  endfunc
+
   func sin.process_sintax_block()
     let type = matchstr(self.sinline[0], '^\w\+')
-    return call(eval('self.process_' . type), [], self)
+    return call(eval('self.process_' . type), [self.sinline], self)
   endfunc
 
   func sin.flush_old_sintax_line()
     if ! empty(self.sinline)
-      call extend(self.out, ['>>>>>>>---'])
-      call extend(self.out, self.process_sintax_block())
-      call extend(self.out, ['---<<<<<<<'])
+      let output = self.process_sintax_block()
+      if ! empty(output)
+        call extend(self.out, output)
+      endif
+    else
+      "TODO: this should probably be in a method of its own for logical separation
+      " prepend the preamble before processing the first sintax line
+      call extend(self.out, [self.preamble])
     endif
   endfunc
 
@@ -178,7 +237,9 @@ function! Sintax(...)
 
   func sin.output() dict
     call self.flush_old_sintax_line()
-    return join(self.out, "\n")
+    let inner = join(self.out, "\n")
+    let highlights = join(self.highlights, "\n")
+    return join([inner, highlights, self.postamble], "\n\n")
   endfunc
 
   " process constructor

@@ -18,9 +18,9 @@ partial token \S\+\s\+
 
 partial separator
     \%(
-      \\}          # an escaped \}
+      \\}          # an_escaped_\}
     \|             # or
-      [^}]         # anything but a }
+      [^}]         # anything_but_a_}
     \)
 
 match vrsNameErr   .Error      contained : ^\%{token}
@@ -29,58 +29,58 @@ match vrsName      .Identifier contained : ^\w\+\s\+
 
 match vrsFlavorErr .Error      contained
   \%(
-    ^\%{token}     # if the line starts with a token
+    ^\%{token}     # if_the_line_starts_with_a_token
   \)\@<=           #   before
-  \%{token}        # a token
+  \%{token}        # a_token
 
 match vrsFlavor    .Type       contained
   \%(
-    ^\%{token}     # if the line starts with a token
+    ^\%{token}     # if_the_line_starts_with_a_token
   \)\@<=           #   before
-  \%{vrsName}      # a vrsName
+  \%{vrsName}      # a_vrsName
 
 match vrsCompItem  .Normal     contained
-    \w\+           # a word
+    \w\+           # a_word
   \|               # or
-    \d\+           # a number
+    \d\+           # a_number
   \|               # or
-    ,\@<=          # a separator if proceeded by a comma
+    ,\@<=          # a_separator_if_proceeded_by_a_comma
     \%{separator}\+
 
 " match a composition atom: \%{pattern-name,count,separator}
 match vrsCompose   .PreProc    contained contains=vrsCompItem
-  \\%{             # a literal \{
-    \S\+           # a word   (pattern-name)
-    ,              # a comma
-    \d\+           # a number (count)
-    ,              # a comma
-    \%{separator}* # an optional separator
-  }                # and a literal }
+  \\%{             # a_literal_\{
+    \S\+           # a_word_(pattern-name)
+    ,              # a_comma
+    \d\+           # a_number_(count)
+    ,              # a_comma
+    \%{separator}* # an_optional_separator
+  }                # and_a_literal_}
 
 match vrsRegExp    .String     contains=vrsCompose contained
   \%(
-    ^\%{token,2}   # if the line starts with two tokens
-  \)\@<=               before
+    ^\%{token,2}   # if_the_line_starts_with_two_tokens
+  \)\@<=           #   before
   .*               # anything
 
 match vrsCommand              contains=vrsName,vrsFlavor,vrsNameErr,vrsFlavorErr,vrsRegExp,vrsComment
-  ^\{%token,2}\S.* # a line with three 'tokens' minimum
+  ^\%{token,2}\S.* # a_line_with_three_'tokens'_minimum
 
 match vrsContinued .String     contains=vrsComment
-  ^\s\+\S.*        # a line with leading whitespace and a 'token'
+  ^\s\+\S.*        # a_line_with_leading_whitespace_and_a_'token'
 
 match vrsComment   .Comment    containedin=ALL contains=vrsTodo
-  \%(              # as long as
+  \%(              # as_long_as
     \%(
-      \\ \\        #   (ignoring any number of double backslashes (\\))
+      \\ \\        #   (ignoring_any_number_of_double_backslashes_(\\))
     \)*
-    \\             #   a backslash
-  \)\@<!           # doesn't precede
-  #.*$             # a literal # followed by anything
+    \\             #   a_backslash
+  \)\@<!           # doesn't_precede
+  #.*$             # a_literal_#_followed_by_anything
 
 match vrsError     .Error
-  ^                # any line starting with
-  [^a-zA-Z0-9_#\ ] # anything that's not alphanumeric, underscore, hash or a space
-  .*               # and anything afterwards
+  ^                # any_line_starting_with
+  [^a-zA-Z0-9_#\ ] # anything_that's_not_alphanumeric,_underscore,_hash_or_a_space
+  .*               # and_anything_afterwards
 
 match vrsError     .Error : foo
