@@ -250,41 +250,4 @@ endfunc
 " test
 
 let sinner = Sintax()
-echo sinner.parse('vrs.sintax')
-
-finish
-
-echo "---- Tests ----"
-
-function! TestLine(line, pattern)
-  let sinner = Sintax()
-  if sinner.matches(a:line, a:pattern)
-    echohl Title
-    echo "Ok"
-    echohl None
-    echo sinner.matchlist(a:line, a:pattern)
-  else
-    echohl Error
-    echo "Failed to match:\n  --> " . a:line . "\nwith: " . a:pattern
-    echohl None
-  endif
-endfunction
-
-
-call TestLine('name    vrs', 'name_line')
-call TestLine('case    ignore', 'case_line')
-call TestLine('spell   default', 'spell_line')
-
-call TestLine('keyword vrsTodo    .Todo : TODO FIXME XXX', 'keyword_line')
-call TestLine("keyword vrsTodo    .Todo\n TODO FIXME XXX", 'keyword_line')
-
-call TestLine('partial token \S\+\s\+', 'partial_line')
-call TestLine("partial token\n \%(\n      \\}          # an escaped \}\n    \|             # or\n      [^}]         # anything but a }\n    \)", 'partial_line')
-
-call TestLine('match vrsNameErr   .Error      contained : ^\%{token}', 'match_line')
-call TestLine("match vrsNameErr   .Error      contained\n ^\%{token}", 'match_line')
-
-
-call TestLine('match vrsNameErr   .Error      contained : ^\%{token}', 'match_line')
-call TestLine("match vrsNameErr   .Error      contained\n ^\%{token}", 'match_line')
-
+call writefile(split(sinner.parse('vrs.sintax'), "\n"), 'vrs-syntax.vim')

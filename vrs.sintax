@@ -83,4 +83,3 @@ match vrsError     .Error
   [^a-zA-Z0-9_#\ ] # anything_that's_not_alphanumeric,_underscore,_hash_or_a_space
   .*               # and_anything_afterwards
 
-match vrsError     .Error : foo
