@@ -34,6 +34,7 @@ let s:p['region_line'] = '^region' . s:p['sintax_args']
 function! Sintax(...)
   let sin = {}
   let sin.out = []
+  let sin.sinline = []
 
   func sin.prepare_output() dict
     let self.out = []
@@ -89,20 +90,41 @@ function! Sintax(...)
     return self.output()
   endfunc
 
+  "TODO: this is where the magic happens
+  "  now we have a logically whole sintax block in self.sinline
+  "  determine the type of line and throw to its processor, returning the
+  "  expanded text for output in the flush command
+  func sin.process_sintax_block()
+    return self.sinline
+  endfunc
+
+  func sin.flush_old_sintax_line()
+    call extend(self.out, ['>>>>>>>---'])
+    call extend(self.out, self.process_sintax_block())
+    call extend(self.out, ['---<<<<<<<'])
+  endfunc
+
+  func sin.prepare_sintax_line() dict
+    call self.flush_old_sintax_line()
+    let self.sinline = []
+  endfunc
+
+  func sin.append_sintax(line) dict
+    call extend(self.sinline, [a:line])
+  endfunc
+
   " process a (single or multiline) sintax block
   func sin.process(line) dict
+    call self.prepare_sintax_line()
     " non multiline patterns must be flush to first column
     let line = a:line
-    " call self.passthrough('----------')
     " TODO: ensure comment lines don't interfere
     while self.curline < self.eof
       " return to outer level parser on blank or comment-only lines
       if self.is_blank_or_comment(line)
         break
       endif
-      " TODO: testing only
-      call self.passthrough(line)
-
+      call self.append_sintax(line)
       " are we still in the same sintax block?
       let self.curline += 1
       if self.curline >= self.eof
@@ -117,6 +139,7 @@ function! Sintax(...)
   endfunc
 
   func sin.output() dict
+    call self.flush_old_sintax_line()
     return join(self.out, "\n")
   endfunc
 
