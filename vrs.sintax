@@ -7,6 +7,11 @@
 " License:	Vim License (see :help license)
 " Location:	syntax/vrs.vim
 " Website:	https://github.com/Raimondi/vrs
+"
+" See vrs.txt for help. This can be accessed by doing:
+"
+" :helptags ~/.vim/doc
+" :help vrs
 
 name    vrs
 case    ignore
@@ -15,6 +20,7 @@ spell   default
 keyword vrsTodo    .Todo : TODO FIXME XXX
 
 partial token \S\+\s\+
+partial name  \w\+\s\+
 
 partial separator
     \%(
@@ -25,7 +31,7 @@ partial separator
 
 match vrsNameErr   .Error      contained : ^\%{token}
 
-match vrsName      .Identifier contained : ^\w\+\s\+
+match vrsName      .Identifier contained : ^\%{name}
 
 match vrsFlavorErr .Error      contained
   \%(
@@ -37,7 +43,7 @@ match vrsFlavor    .Type       contained
   \%(
     ^\%{token}     # if_the_line_starts_with_a_token
   \)\@<=           #   before
-  \%{vrsName}      # a_vrsName
+  \%{name}         # a_vrsName
 
 match vrsCompItem  .Normal     contained
     \w\+           # a_word
