@@ -102,6 +102,13 @@ function! Sintax(...)
     return index(self.region.parts, matchstr(a:line, '^\w\+')) > -1
   endfunction
 
+  function! sin.region_append(str)
+    " Find the last syntax region
+    let i = (match(reverse(copy(self.out)), '^syntax region') * -1) -1
+    " now append the piece.
+    let self.out[i] .= a:str
+  endfunction
+
   func sin.parse(file) dict
     call self.prepare_output()
     " XXX Allow a list as argument
@@ -198,9 +205,9 @@ function! Sintax(...)
   func sin.process_region(line) dict
     " XXX No pattern here
     let [_, name, highlight, args; __] = matchlist(a:line, SinLookup('region_line'))
-    echo highlight
     call self.highlight(name, highlight)
-    return ['syntax region ' . name . ' ' . args]
+    let self.region.args = args
+    return ['syntax region ' . name]
   endfunc
 
   func sin.process_sintax_block()
@@ -253,10 +260,7 @@ function! Sintax(...)
       return
     endif
     if self.in_region > 1
-      " XXX Find the last syntax region
-      let i = (match(reverse(copy(self.out)), '^syntax region') * -1) -1
-      " now append the piece.
-      let self.out[i] .= output
+      call self.region_append(output)
     else
       call extend(self.out, output)
     endif
@@ -282,10 +286,11 @@ function! Sintax(...)
       if self.region.start == 0 || self.region.skip > 1 || self.region.end == 0
         " XXX what now? throw an error?
       endif
+      call self.region_append(' ' . remove(self.region, 'args'))
       let self.region.start = 0
       let self.region.skip = 0
       let self.region.end = 0
-    else
+    elseif self.in_region
       " Still mor region commands
       let self.in_region += 1
     endif
@@ -315,6 +320,9 @@ function! Sintax(...)
 
   func sin.output() dict
     call self.flush_old_sintax_line()
+    if has_key(self.region, 'args')
+      call self.region_append(' ' . remove(self.region, 'args'))
+    endif
     let inner = join(self.out, "\n")
     let highlights = join(self.highlights, "\n")
     return join([inner, highlights, self.postamble], "\n\n")
