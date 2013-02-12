@@ -18,7 +18,11 @@ let s:p['spell_line'] = '^spell\s\+' . s:p['word']
 let s:p['keyword_line'] = '^keyword\s\+' . s:p['sintax_args']
 let s:p['partial_line'] = '^partial\s\+' . s:p['sintax_group_name'] . '\(.*\)\?'
 let s:p['match_line'] = '^match\s\+' . s:p['sintax_args']
-let s:p['region_line'] = '^region\s\+' . s:p['sintax_args']
+let s:p['region_args'] = s:p['sintax_group_name'] . s:p['highlight'] . s:p['sinargs']
+let s:p['region_line'] = '^region\s\+' . s:p['region_args']
+let s:p['start_line'] = '^start\s*\%(:\s*\(.*\)\)\?'
+let s:p['skip_line'] = '^skip\s*\%(:\s*\(.*\)\)\?'
+let s:p['end_line'] = '^end\s*\%(:\s*\(.*\)\)\?'
 
 function! Sintax(...)
   let sin = {}
@@ -26,6 +30,9 @@ function! Sintax(...)
   let sin.highlights = []
   let sin.patterns = {}
   let sin.sinline = []
+  let sin.in_region = 0
+  let sin.region = {'start': 0, 'skip': 0, 'end': 0}
+  let sin.region.parts = ['start', 'skip', 'end']
   let sin.preamble = join([
         \  ''
         \ ,'" Quit when a (custom) syntax file was already loaded'
@@ -72,7 +79,12 @@ function! Sintax(...)
 
   func sin.is_sin_line(line) dict
     let matched = 0
-    for t in ['name', 'case', 'spell', 'keyword', 'partial', 'match', 'region']
+    let tokens = ['name', 'case', 'spell', 'keyword', 'partial', 'match', 'region']
+    if self.in_region
+      " XXX Add the extra commands
+      let tokens = self.region.parts + tokens
+    endif
+    for t in tokens
       if self.matches(a:line, t . '_line')
         let matched = 1
         break
@@ -85,9 +97,15 @@ function! Sintax(...)
     return a:line =~ '^\s*\("\|$\)'
   endfunc
 
+  function! sin.is_region_part(line)
+    " XXX
+    return index(self.region.parts, matchstr(a:line, '^\w\+')) > -1
+  endfunction
+
   func sin.parse(file) dict
     call self.prepare_output()
-    let self.input = readfile(a:file)
+    " XXX Allow a list as argument
+    let self.input = type(a:file) == type('') ? readfile(a:file) : a:file
     let self.curline = 0
     let self.eof = len(self.input)
     while self.curline < self.eof
@@ -178,9 +196,10 @@ function! Sintax(...)
 " let s:p['match_line'] = '^match\s\+' . s:p['sintax_args']
 " let s:p['sintax_args'] = s:p['sintax_group_name'] . s:p['highlight'] . s:p['sinargs'] . '\%(:\(.*\)\)\?'
   func sin.process_region(line) dict
-    let [name, highlight, args, pattern] = self.process_sinargs(a:line)
+    " XXX No pattern here
+    let [_, _, name, highlight, args; __] = matchlist(a:line, SinLookup('region_line'))
     call self.highlight(name, highlight)
-    return ['syntax region ' . name . ' /' . pattern . '/ ' . args]
+    return ['syntax region ' . name . ' ' . args]
   endfunc
 
   func sin.process_sintax_block()
@@ -188,16 +207,42 @@ function! Sintax(...)
     return call(eval('self.process_' . type), [self.sinline], self)
   endfunc
 
+  function! sin.process_start(line)
+    let self.region.start += 1
+    let [_, pattern; __] = matchlist(a:line, SinLookup('start_line'))
+    return ' start=/' . pattern . '/'
+  endfunction
+
+  function! sin.process_skip(line)
+    let self.region.skip += 1
+    let [_, pattern; __] = matchlist(a:line, SinLookup('skip_line'))
+    return ' skip=/' . pattern . '/'
+  endfunction
+
+  function! sin.process_end(line)
+    let self.region.end += 1
+    let [_, pattern; __] = matchlist(a:line, SinLookup('end_line'))
+    return ' end=/' . pattern . '/'
+  endfunction
+
   func sin.flush_old_sintax_line()
-    if ! empty(self.sinline)
-      let output = self.process_sintax_block()
-      if ! empty(output)
-        call extend(self.out, output)
-      endif
-    else
+    " XXX reordered the conditional blocks.
+    if empty(self.sinline)
       "TODO: this should probably be in a method of its own for logical separation
       " prepend the preamble before processing the first sintax line
-      call extend(self.out, [self.preamble])
+      return extend(self.out, [self.preamble])
+    endif
+    let output = self.process_sintax_block()
+    if empty(output)
+      return
+    endif
+    if self.in_region > 1
+      " XXX Find the last syntax region
+      let i = (match(reverse(copy(self.out)), '^syntax region') * -1) -1
+      " now append the piece.
+      let self.out[i] .= output
+    else
+      call extend(self.out, output)
     endif
   endfunc
 
@@ -215,6 +260,23 @@ function! Sintax(...)
     call self.prepare_sintax_line()
     " non multiline patterns must be flush to first column
     let line = a:line
+    if self.in_region && ! self.is_region_part(line)
+      " XXX the region commands are over
+      let self.in_region = 0
+      if self.region.start == 0 || self.region.skip > 1 || self.region.end == 0
+        " XXX what now? throw an error?
+      endif
+      let self.region.start = 0
+      let self.region.skip = 0
+      let self.region.end = 0
+    else
+      " Still mor region commands
+      let self.in_region += 1
+    endif
+    if self.matches(line, 'region_line')
+      " XXX region commands start.
+      let self.in_region = 1
+    endif
     " TODO: ensure comment lines don't interfere
     while self.curline < self.eof
       " return to outer level parser on blank or comment-only lines
@@ -248,6 +310,5 @@ function! Sintax(...)
 endfunc
 
 " test
-
 let sinner = Sintax()
 call writefile(split(sinner.parse('vrs.sintax'), "\n"), 'vrs-syntax.vim')
