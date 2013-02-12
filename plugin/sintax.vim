@@ -271,8 +271,12 @@ function! Sintax(...)
     if self.in_region && ! self.is_region_part(line)
       " the region commands are over
       let self.in_region = 0
-      if self.region.start == 0 || self.region.skip > 1 || self.region.end == 0
-        " XXX what now? throw an error?
+      if self.region.start == 0
+        call self.warn('SinTax: There must be at least one "start" pattern.')
+      elseif self.region.skip > 1
+        call self.warn('SinTax: Only one optional "skip" pattern is allowed.')
+      elseif self.region.end == 0
+        call self.warn('SinTax: There must be at least one "end" pattern.')
       endif
       call self.region_append(' ' . remove(self.region, 'args'))
       let self.region.start = 0
