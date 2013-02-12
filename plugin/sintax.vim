@@ -81,7 +81,7 @@ function! Sintax(...)
     let matched = 0
     let tokens = ['name', 'case', 'spell', 'keyword', 'partial', 'match', 'region']
     if self.in_region
-      " XXX Add the extra commands
+      " Add the extra commands
       let tokens = self.region.parts + tokens
     endif
     for t in tokens
@@ -98,7 +98,6 @@ function! Sintax(...)
   endfunc
 
   function! sin.is_region_part(line)
-    " XXX
     return index(self.region.parts, matchstr(a:line, '^\w\+')) > -1
   endfunction
 
@@ -111,7 +110,7 @@ function! Sintax(...)
 
   func sin.parse(file) dict
     call self.prepare_output()
-    " XXX Allow a list as argument
+    " Allow a list as argument
     let self.input = type(a:file) == type('') ? readfile(a:file) : a:file
     let self.curline = 0
     let self.eof = len(self.input)
@@ -249,7 +248,6 @@ function! Sintax(...)
   endfunction
 
   func sin.flush_old_sintax_line()
-    " XXX reordered the conditional blocks.
     if empty(self.sinline)
       "TODO: this should probably be in a method of its own for logical separation
       " prepend the preamble before processing the first sintax line
@@ -281,7 +279,7 @@ function! Sintax(...)
     " non multiline patterns must be flush to first column
     let line = a:line
     if self.in_region && ! self.is_region_part(line)
-      " XXX the region commands are over
+      " the region commands are over
       let self.in_region = 0
       if self.region.start == 0 || self.region.skip > 1 || self.region.end == 0
         " XXX what now? throw an error?
@@ -295,7 +293,7 @@ function! Sintax(...)
       let self.in_region += 1
     endif
     if self.matches(line, 'region_line')
-      " XXX region commands start.
+      " region commands start.
       let self.in_region = 1
     endif
     " TODO: ensure comment lines don't interfere
