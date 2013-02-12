@@ -202,7 +202,7 @@ function! Sintax(...)
 " let s:p['match_line'] = '^match\s\+' . s:p['sintax_args']
 " let s:p['sintax_args'] = s:p['sintax_group_name'] . s:p['highlight'] . s:p['sinargs'] . '\%(:\(.*\)\)\?'
   func sin.process_region(line) dict
-    " XXX No pattern here
+    " No pattern here
     let [_, name, highlight, args; __] = matchlist(a:line, SinLookup('region_line'))
     call self.highlight(name, highlight)
     let self.region.args = args
