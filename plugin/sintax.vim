@@ -262,6 +262,21 @@ function! Sintax(...)
     call extend(self.sinline, [a:line])
   endfunc
 
+  func sin.close_region()
+    let self.in_region = 0
+    if self.region.start == 0
+      call self.warn('SinTax: There must be at least one "start" pattern.')
+    elseif self.region.skip > 1
+      call self.warn('SinTax: Only one optional "skip" pattern is allowed.')
+    elseif self.region.end == 0
+      call self.warn('SinTax: There must be at least one "end" pattern.')
+    endif
+    call self.region_append(' ' . remove(self.region, 'args'))
+    let self.region.start = 0
+    let self.region.skip = 0
+    let self.region.end = 0
+  endfunction
+
   " process a (single or multiline) sintax block
   func sin.process(line) dict
     call self.prepare_sintax_line()
@@ -269,18 +284,7 @@ function! Sintax(...)
     let line = a:line
     if self.in_region && ! self.is_region_part(line)
       " the region commands are over
-      let self.in_region = 0
-      if self.region.start == 0
-        call self.warn('SinTax: There must be at least one "start" pattern.')
-      elseif self.region.skip > 1
-        call self.warn('SinTax: Only one optional "skip" pattern is allowed.')
-      elseif self.region.end == 0
-        call self.warn('SinTax: There must be at least one "end" pattern.')
-      endif
-      call self.region_append(' ' . remove(self.region, 'args'))
-      let self.region.start = 0
-      let self.region.skip = 0
-      let self.region.end = 0
+      call self.close_region()
     elseif self.in_region
       " Still mor region commands
       let self.in_region += 1
