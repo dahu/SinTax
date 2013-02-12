@@ -54,6 +54,10 @@ function! Sintax(...)
         \ '',
         \ '" vim: set sw=2 sts=2 et fdm=marker:'], "\n")
 
+  func sin.append_preamble()
+      return extend(self.out, [self.preamble])
+  endfunc
+
   func sin.lookup(name) dict
     " echo 'looking up name="' . a:name . '", value="' . get(self.patterns, a:name) . '"'
     return get(self.patterns, a:name)
@@ -112,6 +116,7 @@ function! Sintax(...)
 
   func sin.parse(file) dict
     call self.prepare_output()
+    call self.append_preamble()
     " Allow a list as argument
     let self.input = type(a:file) == type('') ? readfile(a:file) : a:file
     let self.curline = 0
@@ -238,9 +243,7 @@ function! Sintax(...)
 
   func sin.flush_old_sintax_line()
     if empty(self.sinline)
-      "TODO: this should probably be in a method of its own for logical separation
-      " prepend the preamble before processing the first sintax line
-      return extend(self.out, [self.preamble])
+      return
     endif
     let output = self.process_sintax_block()
     if empty(output)
