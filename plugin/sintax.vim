@@ -200,9 +200,6 @@ function! Sintax(...)
     return ['syntax match ' . name . ' /' . pattern . '/ ' . args]
   endfunc
 
-  " TODO: get region working
-" let s:p.match_line = '^match\s\+' . s:p.sintax_args
-" let s:p.sintax_args = s:p.sintax_group_name . s:p.highlight . s:p.sinargs . '\%(:\(.*\)\)\?'
   func sin.process_region(line) dict
     " No pattern here
     let [_, name, highlight, args; __] = matchlist(a:line, SinLookup('region_line'))
