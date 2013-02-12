@@ -197,7 +197,8 @@ function! Sintax(...)
 " let s:p['sintax_args'] = s:p['sintax_group_name'] . s:p['highlight'] . s:p['sinargs'] . '\%(:\(.*\)\)\?'
   func sin.process_region(line) dict
     " XXX No pattern here
-    let [_, _, name, highlight, args; __] = matchlist(a:line, SinLookup('region_line'))
+    let [_, name, highlight, args; __] = matchlist(a:line, SinLookup('region_line'))
+    echo highlight
     call self.highlight(name, highlight)
     return ['syntax region ' . name . ' ' . args]
   endfunc
@@ -210,18 +211,33 @@ function! Sintax(...)
   function! sin.process_start(line)
     let self.region.start += 1
     let [_, pattern; __] = matchlist(a:line, SinLookup('start_line'))
+    if pattern == ''
+      let pattern = escape(self.erex.parse(join(a:line[1:-1])), '/')
+    else
+      let pattern = escape(self.erex.parse(pattern), '/')
+    endif
     return ' start=/' . pattern . '/'
   endfunction
 
   function! sin.process_skip(line)
     let self.region.skip += 1
     let [_, pattern; __] = matchlist(a:line, SinLookup('skip_line'))
+    if pattern == ''
+      let pattern = escape(self.erex.parse(join(a:line[1:-1])), '/')
+    else
+      let pattern = escape(self.erex.parse(pattern), '/')
+    endif
     return ' skip=/' . pattern . '/'
   endfunction
 
   function! sin.process_end(line)
     let self.region.end += 1
     let [_, pattern; __] = matchlist(a:line, SinLookup('end_line'))
+    if pattern == ''
+      let pattern = escape(self.erex.parse(join(a:line[1:-1])), '/')
+    else
+      let pattern = escape(self.erex.parse(pattern), '/')
+    endif
     return ' end=/' . pattern . '/'
   endfunction
 
@@ -312,3 +328,5 @@ endfunc
 " test
 let sinner = Sintax()
 call writefile(split(sinner.parse('vrs.sintax'), "\n"), 'vrs-syntax.vim')
+let sinner = Sintax()
+call writefile(split(sinner.parse('syn-region.txt'), "\n"), 'syn-region.vim')
