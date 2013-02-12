@@ -36,23 +36,23 @@ function! Sintax(...)
   let sin.region = {'start': 0, 'skip': 0, 'end': 0}
   let sin.region.parts = ['start', 'skip', 'end']
   let sin.preamble = join([
-        \  ''
-        \ ,'" Quit when a (custom) syntax file was already loaded'
-        \ ,'if exists("b:current_syntax")'
-        \ ,'  finish'
-        \ ,'endif'
-        \ ,''
-        \ ,'" Allow use of line continuation.'
-        \ ,'let s:save_cpo = &cpo'
-        \ ,'set cpo&vim'
-        \ ,''], "\n")
+        \  '',
+        \ '" Quit when a (custom) syntax file was already loaded',
+        \ 'if exists("b:current_syntax")',
+        \ '  finish',
+        \ 'endif',
+        \ '',
+        \ '" Allow use of line continuation.',
+        \ 'let s:save_cpo = &cpo',
+        \ 'set cpo&vim',
+        \ ''], "\n")
   let sin.postamble = join([
-        \  'let b:current_syntax = "%name"'
-        \ ,''
-        \ ,'let &cpo = s:save_cpo'
-        \ ,'unlet s:save_cpo'
-        \ ,''
-        \ ,'" vim: set sw=2 sts=2 et fdm=marker:'], "\n")
+        \  'let b:current_syntax = "%name"',
+        \ '',
+        \ 'let &cpo = s:save_cpo',
+        \ 'unlet s:save_cpo',
+        \ '',
+        \ '" vim: set sw=2 sts=2 et fdm=marker:'], "\n")
 
   func sin.lookup(name) dict
     " echo 'looking up name="' . a:name . '", value="' . get(self.patterns, a:name) . '"'
