@@ -1,0 +1,30 @@
+" style 1 uses inline regex strings after a :
+
+region foo .Bar syn-region options go here till end of line
+start: the start pattern
+start: there can be many of these
+skip: an optional skip pattern
+end: the end pattern
+end: and there can be many of these
+
+" style 2 uses extended multiline regex strings after the
+" [start|skip|end] tags and NO trailing :
+
+region foo .Bar syn-region options go here till end of line
+start
+  the start
+  pattern as
+  a multiline
+start
+  there can
+  be many
+  of these
+skip
+  an optional
+  skip pattern
+end
+  the end
+  pattern
+end
+  and there can
+  be many of these
