@@ -5,25 +5,26 @@ function! SinLookup(name)
   return get(s:p, a:name)
 endfunction
 
-let s:p = {}
-let s:p['word'] = '\%(\s*\(\h\w\+\)\s*\)'
-let s:p['optword'] = s:p['word'] . '\?'
-let s:p['inline_pattern'] = '\%(:\(.*\)\)\?'
-let s:p['sintax_group_name'] = s:p['word']
-let s:p['highlight'] = '\%(\.' . s:p['word'] . '\)\?'
-let s:p['sinargs'] = '\([^:]*\)'
-let s:p['sintax_args'] = s:p['sintax_group_name'] . s:p['highlight'] . s:p['sinargs'] . s:p['inline_pattern']
-let s:p['name_line'] = '^name\s\+' . s:p['word']
-let s:p['case_line'] = '^case\s\+' . s:p['word']
-let s:p['spell_line'] = '^spell\s\+' . s:p['word']
-let s:p['keyword_line'] = '^keyword\s\+' . s:p['sintax_args']
-let s:p['partial_line'] = '^partial\s\+' . s:p['sintax_group_name'] . '\(.*\)\?'
-let s:p['match_line'] = '^match\s\+' . s:p['sintax_args']
-let s:p['region_args'] = s:p['sintax_group_name'] . s:p['highlight'] . s:p['sinargs']
-let s:p['region_line'] = '^region\s\+' . s:p['region_args']
-let s:p['start_line'] = '^start\s*' . s:p['inline_pattern']
-let s:p['skip_line'] = '^skip\s*' . s:p['inline_pattern']
-let s:p['end_line'] = '^end\s*' . s:p['inline_pattern']
+let s:p                   = {}
+let s:p.word              = '\%(\s*\(\h\w\+\)\s*\)'
+let s:p.optword           = s:p.word . '\?'
+let s:p.inline_pattern    = '\%(:\(.*\)\)\?'
+let s:p.sintax_group_name = s:p.word
+let s:p.highlight         = '\%(\.' . s:p.word . '\)\?'
+let s:p.sinargs           = '\([^:]*\)'
+let s:p.sintax_args       = s:p.sintax_group_name . s:p.highlight . s:p.sinargs
+                          \ . s:p.inline_pattern
+let s:p.name_line         = '^name\s\+' . s:p.word
+let s:p.case_line         = '^case\s\+' . s:p.word
+let s:p.spell_line        = '^spell\s\+' . s:p.word
+let s:p.keyword_line      = '^keyword\s\+' . s:p.sintax_args
+let s:p.partial_line      = '^partial\s\+' . s:p.sintax_group_name . '\(.*\)\?'
+let s:p.match_line        = '^match\s\+' . s:p.sintax_args
+let s:p.region_args       = s:p.sintax_group_name . s:p.highlight . s:p.sinargs
+let s:p.region_line       = '^region\s\+' . s:p.region_args
+let s:p.start_line        = '^start\s*' . s:p.inline_pattern
+let s:p.skip_line         = '^skip\s*' . s:p.inline_pattern
+let s:p.end_line          = '^end\s*' . s:p.inline_pattern
 
 function! Sintax(...)
   let sin = {}
@@ -200,8 +201,8 @@ function! Sintax(...)
   endfunc
 
   " TODO: get region working
-" let s:p['match_line'] = '^match\s\+' . s:p['sintax_args']
-" let s:p['sintax_args'] = s:p['sintax_group_name'] . s:p['highlight'] . s:p['sinargs'] . '\%(:\(.*\)\)\?'
+" let s:p.match_line = '^match\s\+' . s:p.sintax_args
+" let s:p.sintax_args = s:p.sintax_group_name . s:p.highlight . s:p.sinargs . '\%(:\(.*\)\)\?'
   func sin.process_region(line) dict
     " No pattern here
     let [_, name, highlight, args; __] = matchlist(a:line, SinLookup('region_line'))
