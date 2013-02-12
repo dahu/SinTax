@@ -67,7 +67,7 @@ function! Sintax(...)
 
   func sin.passthrough(line) dict
     call extend(self.out, [a:line])
-  endfunction
+  endfunc
 
   func sin.matches(string, pattern_name) dict
     let p = SinLookup(a:pattern_name)
@@ -99,16 +99,16 @@ function! Sintax(...)
     return a:line =~ '^\s*\("\|$\)'
   endfunc
 
-  function! sin.is_region_part(line)
+  func sin.is_region_part(line)
     return index(self.region.parts, matchstr(a:line, '^\w\+')) > -1
-  endfunction
+  endfunc
 
-  function! sin.region_append(str)
+  func sin.region_append(str)
     " Find the last syntax region
     let i = (match(reverse(copy(self.out)), '^syntax region') * -1) -1
     " now append the piece.
     let self.out[i] .= a:str
-  endfunction
+  endfunc
 
   func sin.parse(file) dict
     call self.prepare_output()
@@ -208,7 +208,7 @@ function! Sintax(...)
     return ['syntax region ' . name]
   endfunc
 
-  function! sin.process_region_pat(name, line)
+  func sin.process_region_pat(name, line)
     let self.region[a:name] += 1
     let [_, pattern; __] = matchlist(a:line, SinLookup(a:name . '_line'))
     if pattern == ''
@@ -217,19 +217,19 @@ function! Sintax(...)
       let pattern = escape(self.erex.parse(pattern), '/')
     endif
     return ' ' . a:name . '=/' . pattern . '/'
-  endfunction
+  endfunc
 
-  function! sin.process_start(line)
+  func sin.process_start(line)
     return self.process_region_pat('start', a:line)
-  endfunction
+  endfunc
 
-  function! sin.process_skip(line)
+  func sin.process_skip(line)
     return self.process_region_pat('skip', a:line)
-  endfunction
+  endfunc
 
-  function! sin.process_end(line)
+  func sin.process_end(line)
     return self.process_region_pat('end', a:line)
-  endfunction
+  endfunc
 
   func sin.process_sintax_block()
     let type = matchstr(self.sinline[0], '^\w\+')
@@ -275,7 +275,7 @@ function! Sintax(...)
     let self.region.start = 0
     let self.region.skip = 0
     let self.region.end = 0
-  endfunction
+  endfunc
 
   " process a (single or multiline) sintax block
   func sin.process(line) dict
