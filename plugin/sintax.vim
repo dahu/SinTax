@@ -209,11 +209,6 @@ function! Sintax(...)
     return ['syntax region ' . name]
   endfunc
 
-  func sin.process_sintax_block()
-    let type = matchstr(self.sinline[0], '^\w\+')
-    return call(eval('self.process_' . type), [self.sinline], self)
-  endfunc
-
   function! sin.process_region_pat(name, line)
     let self.region[a:name] += 1
     let [_, pattern; __] = matchlist(a:line, SinLookup(a:name . '_line'))
@@ -236,6 +231,11 @@ function! Sintax(...)
   function! sin.process_end(line)
     return self.process_region_pat('end', a:line)
   endfunction
+
+  func sin.process_sintax_block()
+    let type = matchstr(self.sinline[0], '^\w\+')
+    return call(eval('self.process_' . type), [self.sinline], self)
+  endfunc
 
   func sin.flush_old_sintax_line()
     if empty(self.sinline)
