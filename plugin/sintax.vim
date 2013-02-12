@@ -1,5 +1,5 @@
 
-let erex = ExtendedRegexObject('SinLookup')
+let erex = extended_regex#ExtendedRegex('SinLookup')
 function! SinLookup(name)
   " echo 'looking up ''' . a:name . ''''
   return get(s:p, a:name)
@@ -58,7 +58,7 @@ function! Sintax(...)
     return get(self.patterns, a:name)
   endfunc
 
-  let sin.erex = ExtendedRegexObject(eval('sin.lookup'), sin)
+  let sin.erex = extended_regex#ExtendedRegex(eval('sin.lookup'), sin)
 
   func sin.prepare_output() dict
     let self.out = []
