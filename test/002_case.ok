@@ -1,0 +1,4 @@
+syntax case match
+syntax case ignore
+case
+syntax case foo
