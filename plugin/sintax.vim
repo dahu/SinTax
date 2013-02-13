@@ -159,7 +159,7 @@ function! Sintax(...)
   func sin.process_case(line) dict
     let [_, case ;__] = matchlist(a:line, SinLookup('case_line'))
     if case !~# 'match\|ignore'
-      self.warn("Unknown 'case' argument : " . case)
+      call self.warn("Unknown 'case' argument : " . case)
     endif
     return ['syntax case ' . case]
   endfunc
@@ -167,7 +167,7 @@ function! Sintax(...)
   func sin.process_spell(line) dict
     let [_, spell ;__] = matchlist(a:line, SinLookup('spell_line'))
     if spell !~# 'toplevel\|notoplevel\|default'
-      self.warn("Unknown 'spell' argument : " . case)
+      call self.warn("Unknown 'spell' argument : " . case)
     endif
     return ['syntax spell ' . spell]
   endfunc
