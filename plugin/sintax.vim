@@ -250,7 +250,7 @@ function! Sintax(...)
 
   func sin.flush_old_sintax_line()
     if empty(self.sinline)
-      return
+      return self.append_preamble()
     endif
     let output = self.process_sintax_block()
     if empty(output)
@@ -290,7 +290,6 @@ function! Sintax(...)
   " process a (single or multiline) sintax block
   func sin.process(line) dict
     call self.prepare_sintax_line()
-    call self.append_preamble()
     " non multiline patterns must be flush to first column
     let line = a:line
     if self.in_region && ! self.is_region_part(line)
