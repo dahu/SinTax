@@ -28,6 +28,8 @@ let s:p.end_line          = '^end\s*' . s:p.inline_pattern
 
 function! Sintax(...)
   let sin = {}
+  " when enabled, 'document' generates output with pre- and post-amble
+  let sin.options = {'document' : 1}
   let sin.out = []
   let sin.highlights = []
   let sin.patterns = {}
@@ -55,7 +57,9 @@ function! Sintax(...)
         \ '" vim: set sw=2 sts=2 et fdm=marker:'], "\n")
 
   func sin.append_preamble()
-      return extend(self.out, [self.preamble])
+    if self.options.document
+      call extend(self.out, [self.preamble])
+    endif
   endfunc
 
   func sin.lookup(name) dict
@@ -114,9 +118,12 @@ function! Sintax(...)
     let self.out[i] .= a:str
   endfunc
 
-  func sin.parse(file) dict
+  func sin.parse(file, ...) dict
+    if a:0
+      " user supplied options
+      call extend(self.options, a:1)
+    endif
     call self.prepare_output()
-    call self.append_preamble()
     " Allow a list as argument
     let self.input = type(a:file) == type('') ? readfile(a:file) : a:file
     let self.curline = 0
@@ -283,6 +290,7 @@ function! Sintax(...)
   " process a (single or multiline) sintax block
   func sin.process(line) dict
     call self.prepare_sintax_line()
+    call self.append_preamble()
     " non multiline patterns must be flush to first column
     let line = a:line
     if self.in_region && ! self.is_region_part(line)
@@ -323,7 +331,12 @@ function! Sintax(...)
     endif
     let inner = join(self.out, "\n")
     let highlights = join(self.highlights, "\n")
-    return join([inner, highlights, self.postamble], "\n\n")
+    if self.options.document
+      let output = join([inner, highlights, self.postamble], "\n\n")
+    else
+      let output = join([inner, highlights], "\n\n")
+    endif
+    return output
   endfunc
 
   " process constructor
@@ -334,6 +347,6 @@ endfunc
 finish
 " test
 let sinner = Sintax()
-call writefile(split(sinner.parse('vrs.sintax'), "\n"), 'vrs-syntax.vim')
+call writefile(split(sinner.parse('vrs.sintax', {'document' : 0}), "\n"), 'vrs-syntax.vim')
 let sinner = Sintax()
 call writefile(split(sinner.parse('syn-region.txt'), "\n"), 'syn-region.vim')
