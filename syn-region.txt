@@ -1,6 +1,8 @@
+name regiontest
+
 " style 1 uses inline regex strings after a :
 
-region foo .Bar syn-region options go here till end of line
+region foo .Bar syn-region options go here till end of line :
 start: the start pattern
 start: there can be many of these
 skip: an optional skip pattern
@@ -11,20 +13,22 @@ end: and there can be many of these
 " [start|skip|end] tags and NO trailing :
 
 region foo .Bar syn-region options go here till end of line
-start
+start:
   the start
   pattern as
   a multiline
-start
+start:
   there can
   be many
   of these
-skip
+skip:
   an optional
   skip pattern
-end
+end:
   the end
   pattern
-end
+end:
   and there can
   be many of these
+
+match foo .Bar : yadda

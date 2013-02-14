@@ -33,19 +33,19 @@ match vrsNameErr   .Error      contained : ^\%{token}
 
 match vrsName      .Identifier contained : ^\%{name}
 
-match vrsFlavorErr .Error      contained
+match vrsFlavorErr .Error      contained :
   \%(
     ^\%{token}     # if_the_line_starts_with_a_token
   \)\@<=           #   before
   \%{token}        # a_token
 
-match vrsFlavor    .Type       contained
+match vrsFlavor    .Type       contained :
   \%(
     ^\%{token}     # if_the_line_starts_with_a_token
   \)\@<=           #   before
   \%{name}         # a_vrsName
 
-match vrsCompItem  .Normal     contained
+match vrsCompItem  .Normal     contained :
     \w\+           # a_word
   \|               # or
     \d\+           # a_number
@@ -54,7 +54,7 @@ match vrsCompItem  .Normal     contained
     \%{separator}\+
 
 " match a composition atom: \%{pattern-name,count,separator}
-match vrsCompose   .PreProc    contained contains=vrsCompItem
+match vrsCompose   .PreProc    contained contains=vrsCompItem :
   \\%{             # a_literal_\{
     \S\+           # a_word_(pattern-name)
     ,              # a_comma
@@ -63,19 +63,19 @@ match vrsCompose   .PreProc    contained contains=vrsCompItem
     \%{separator}* # an_optional_separator
   }                # and_a_literal_}
 
-match vrsRegExp    .String     contains=vrsCompose contained
+match vrsRegExp    .String     contains=vrsCompose contained :
   \%(
     ^\%{token,2}   # if_the_line_starts_with_two_tokens
   \)\@<=           #   before
   .*               # anything
 
-match vrsCommand              contains=vrsName,vrsFlavor,vrsNameErr,vrsFlavorErr,vrsRegExp,vrsComment
+match vrsCommand              contains=vrsName,vrsFlavor,vrsNameErr,vrsFlavorErr,vrsRegExp,vrsComment :
   ^\%{token,2}\S.* # a_line_with_three_'tokens'_minimum
 
-match vrsContinued .String     contains=vrsComment
+match vrsContinued .String     contains=vrsComment :
   ^\s\+\S.*        # a_line_with_leading_whitespace_and_a_'token'
 
-match vrsComment   .Comment    containedin=ALL contains=vrsTodo
+match vrsComment   .Comment    containedin=ALL contains=vrsTodo :
   \%(              # as_long_as
     \%(
       \\ \\        #   (ignoring_any_number_of_double_backslashes_(\\))
@@ -84,7 +84,7 @@ match vrsComment   .Comment    containedin=ALL contains=vrsTodo
   \)\@<!           # doesn't_precede
   #.*$             # a_literal_#_followed_by_anything
 
-match vrsError     .Error
+match vrsError     .Error :
   ^                # any_line_starting_with
   [^a-zA-Z0-9_#\ ] # anything_that's_not_alphanumeric,_underscore,_hash_or_a_space
   .*               # and_anything_afterwards
