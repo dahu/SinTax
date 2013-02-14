@@ -247,7 +247,7 @@ function! Sintax(...)
     if self.in_region > 1
       call self.region_append(output)
     else
-      call extend(self.out, output)
+      call add(self.out, substitute(get(output, 0, ''), '\s*$', '', ''))
     endif
   endfunc
 
