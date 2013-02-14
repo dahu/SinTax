@@ -1,3 +1,3 @@
-match foo .Bar some options
+match foo .Bar some options :
   a multi
   line pattern
