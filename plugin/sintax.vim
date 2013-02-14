@@ -151,13 +151,13 @@ function! Sintax(...)
   endfunc
 
   func sin.process_name(line) dict
-    let [_, name ;__] = matchlist(a:line, SinLookup('name_line'))
+    let [_, name ;__] = matchlist(join(a:line), SinLookup('name_line'))
     let self.postamble = substitute(self.postamble, '%name', name, 'g')
     return []
   endfunc
 
   func sin.process_case(line) dict
-    let [_, case ;__] = matchlist(a:line, SinLookup('case_line'))
+    let [_, case ;__] = matchlist(join(a:line), SinLookup('case_line'))
     if case !~# 'match\|ignore'
       call self.warn("Unknown 'case' argument : " . case)
     endif
@@ -165,7 +165,7 @@ function! Sintax(...)
   endfunc
 
   func sin.process_spell(line) dict
-    let [_, spell ;__] = matchlist(a:line, SinLookup('spell_line'))
+    let [_, spell ;__] = matchlist(join(a:line), SinLookup('spell_line'))
     if spell !~# 'toplevel\|notoplevel\|default'
       call self.warn("Unknown 'spell' argument : " . case)
     endif
@@ -173,12 +173,8 @@ function! Sintax(...)
   endfunc
 
   func sin.process_sinargs(line) dict
-    let [_, _, name, highlight, args, pattern ;__] = matchlist(a:line, '^\(\w\+\)' . SinLookup('sintax_args'))
-    if pattern == ''
-      let pattern = escape(self.erex.parse(join(a:line[1:-1])), '/')
-    else
-      let pattern = escape(self.erex.parse(pattern), '/')
-    endif
+    let [_, _, name, highlight, args, pattern ;__] = matchlist(join(a:line), '^\(\w\+\)' . SinLookup('sintax_args'))
+    let pattern = escape(self.erex.parse(pattern), '/')
     return [name, highlight, args, pattern]
   endfunc
 
@@ -189,18 +185,14 @@ function! Sintax(...)
   endfunc
 
   func sin.process_keyword(line) dict
-    let [_, _, name, highlight, args, pattern ;__] = matchlist(a:line, '^\(\w\+\)' . SinLookup('sintax_args'))
+    let [_, _, name, highlight, args, pattern ;__] = matchlist(join(a:line), '^\(\w\+\)' . SinLookup('sintax_args'))
     call self.highlight(name, highlight)
     return ['syntax keyword ' . join([name, pattern, args], ' ')]
   endfunc
 
   func sin.process_partial(line) dict
-    let [_, name, pattern ;__] = matchlist(a:line, SinLookup('partial_line'))
-    if pattern == ''
-      let pattern = escape(self.erex.parse(join(a:line[1:-1])), '/')
-    else
-      let pattern = escape(self.erex.parse(pattern), '/')
-    endif
+    let [_, name, pattern ;__] = matchlist(join(a:line), SinLookup('partial_line'))
+    let pattern = escape(self.erex.parse(pattern), '/')
     let self.patterns[name] = pattern
     return []
   endfunc
@@ -222,12 +214,8 @@ function! Sintax(...)
 
   func sin.process_region_pat(name, line)
     let self.region[a:name] += 1
-    let [_, pattern; __] = matchlist(a:line, SinLookup(a:name . '_line'))
-    if pattern == ''
-      let pattern = escape(self.erex.parse(join(a:line[1:-1])), '/')
-    else
-      let pattern = escape(self.erex.parse(pattern), '/')
-    endif
+    let [_, pattern; __] = matchlist(join(a:line), SinLookup(a:name . '_line'))
+    let pattern = escape(self.erex.parse(pattern), '/')
     return ' ' . a:name . '=/' . pattern . '/'
   endfunc
 
