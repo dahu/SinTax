@@ -1,0 +1,18 @@
+" Partial driver for Sintax runVimTests
+" Point your actual .vim files at this driver
+
+" NOTE: The partial driver is for tests that do NOT include the preamble and
+" postamble in the output. Use the test_document driver for whole
+" vim-syntax-file output.
+
+let sfile = expand('<sfile>:p:t:r')
+let infile = sfile . '.in'
+let outfile = sfile . '.out'
+
+let sinner = Sintax()
+let output = split(sinner.parse(readfile(infile), {'document' : 0}), '\n')
+
+call writefile(output, outfile)
+quit!
+
+" vim: set ft=vim:

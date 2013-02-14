@@ -1,1 +1,1 @@
-test_partial
+test_multiline_partial
