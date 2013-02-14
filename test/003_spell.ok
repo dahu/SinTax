@@ -1,0 +1,10 @@
+syntax spell toplevel
+
+syntax spell notoplevel
+
+syntax spell default
+
+spell
+
+syntax spell foo
+

@@ -12,8 +12,8 @@ let outfile = sfile . '.out'
 let output = []
 for line in readfile(infile)
   let sinner = Sintax()
-  let partial = substitute(sinner.parse([line], {'document' : 0}), "\n*$", '', '')
-  call add(output, partial)
+  let partial = split(sinner.parse([line], {'document' : 0}), '\n')
+  call extend(output, partial)
 endfor
 
 call writefile(output, outfile)

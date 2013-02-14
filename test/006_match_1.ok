@@ -1,0 +1,3 @@
+syntax match foo /apattern/ some options 
+
+hi def link foo Bar
