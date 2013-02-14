@@ -19,10 +19,10 @@ spell   default
 
 keyword vrsTodo    .Todo : TODO FIXME XXX
 
-partial token \S\+\s\+
-partial name  \w\+\s\+
+partial token : \S\+\s\+
+partial name  : \w\+\s\+
 
-partial separator
+partial separator :
     \%(
       \\}          # an_escaped_\}
     \|             # or
