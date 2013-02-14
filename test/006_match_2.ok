@@ -1,3 +1,3 @@
-syntax match foo /amultilinepattern/ some options 
+syntax match foo /amultilinepattern/ some options
 
 hi def link foo Bar

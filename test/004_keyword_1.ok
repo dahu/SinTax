@@ -1,3 +1,3 @@
-syntax keyword foo  BLAH YADDA 
+syntax keyword foo  BLAH YADDA
 
 hi def link foo Bar
