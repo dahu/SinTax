@@ -3,33 +3,43 @@ case ignore
 spell default
 syntax sync fromstart
 
-partial word              : \%(\_s*\h\w\+\_s*\)
+partial syn_args : \%(contain\%(s\|ed\%(in\)\?\)\|oneline\|fold\|display
+                    \|extend\|conceal\%(ends\)\?\|cchar\|nextgroup
+                    \|transparent\|skip\%(white\|nl\|empty\)\)\%(=\S*\)\?
+partial word              : \%(\<\h\w*\_s*\)
 partial optword           : \%{word}\?
 partial inline_pattern    : \%(:.*\)\?
 partial sintax_group_name : \%{word}
 partial highlight         : \%(\.\%{word}\)\?
 partial sinargs           : \%(\%(\h[^:]*\)\?\)
-partial sintax_args       : \%{sintax_group_name}\%{highlight}\%{sinargs}\%{inline_pattern}
+partial sintax_args       :
+  \%{sintax_group_name}\%{highlight}\%{sinargs}\%{inline_pattern}
 partial commands          : ^\%(partial\|match\|keyword\|name\|case\|spell\)
 region sintax_command_region contains=sintax_name_line,sintax_case_line,sintax_spell_line,sintax_keyword_line,sintax_partial_line,sintax_match_line
 start : \%{commands}
 end   : \n\%(\n\|\S\|\%$\)\@=
 region sintax_command_region contains=sintax_region_line,sintax_region_arg_line
-start : ^\%(region\|start\|skip\|end\)
+start : ^region
 end   : \n\%(\n\|\%(start\|skip\|end\)\@!\S\|\%$\)\@=
 match sintax_region_cmd        : ^\%(start\|skip\|end\)\>
 partial region_args     :  \%{sintax_group_name}\%{highlight}\%{sinargs}
-match sintax_name_line       contained contains=sintax_command,sintax_syn_name,sintax_highlight : ^name\_s\+\%{word}
+match sintax_name_line
+  contained contains=sintax_command,sintax_syn_name,sintax_highlight :
+  ^name\_s\+\%{word}
 match sintax_case_line       contained contains=sintax_command,sintax_syn_name,sintax_highlight : ^case\_s\+\%{word}
 match sintax_spell_line      contained contains=sintax_command,sintax_syn_name,sintax_highlight : ^spell\_s\+\%{word}
 match sintax_keyword_line    contained contains=sintax_command,sintax_syn_name,sintax_highlight : ^keyword\_s\+\%{sintax_args}
-match sintax_partial_line    contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_pat : ^partial\_s\+\%{sintax_group_name}\%{inline_pattern}
+match sintax_partial_line
+  contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_pat :
+  ^partial\_s\+\%{sintax_group_name}\%{inline_pattern}
 match sintax_match_line      contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_args,sintax_pat : ^match\_s\+\%{sintax_args}
 match sintax_region_line     contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_args : ^region\_s\+\%{region_args}
 match sintax_region_arg_line contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_pat : \%{sintax_region_cmd}\_s*\%{inline_pattern}
-match sintax_command  .Statement contained : ^\h\w*
-match sintax_syn_name  .Constant contained : \%(\%{sintax_command}\_s\+\)\@<=\h\w\+
-match sintax_highlight  .Type contained    : \%(\%{sintax_command}\_s\+\h\w\+\_s\+\)\@<=\.\h\w*
-match sintax_args  .Identifier contained   : \%(\%{sintax_command}\_s\+\%(\h\w\+\_s\+\)\%(\.\h\w*\_s\+\)\?\)\@<=\h[^:]*
+match sintax_command  .Identifier contained : ^\h\w*
+match sintax_syn_name  .PreProc contained : \%(\%{sintax_command}\_s\+\)\@<=\h\w\+
+match sintax_highlight  .Statement contained    : \%(\%{sintax_command}\_s\+\h\w\+\_s\+\)\@<=\.\h\w*
+match sintax_args  .Type contained  contains=sintax_args_name : \%(\%{sintax_command}\_s\+\%(\h\w\+\_s\+\)\%(\.\h\w*\_s\+\)\?\)\@<=\%(\%(\%{syn_args}\)\_s*\)\+
+match sintax_args_name .Normal contained contains=sintax_args_comma : =\@<=\S\+
+match sintax_args_comma .Type contained : ,
 match sintax_pat  .String contained contains=sintax_comment       : \%(\%{sintax_command}\_s*\%(\h\w\+\_s*\)\?\%(\.\h\w*\_s*\)\?\%([^:]\+\)\?\)\@<=:\%(\n\%(\n\|\S\)\@!\|.\)\+
 match sintax_comment .Comment contained :\s\#\s*\S*$
