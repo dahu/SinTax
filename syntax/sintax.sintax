@@ -31,4 +31,5 @@ match sintax_command  .Statement contained : ^\h\w*
 match sintax_syn_name  .Constant contained : \%(\%{sintax_command}\_s\+\)\@<=\h\w\+
 match sintax_highlight  .Type contained    : \%(\%{sintax_command}\_s\+\h\w\+\_s\+\)\@<=\.\h\w*
 match sintax_args  .Identifier contained   : \%(\%{sintax_command}\_s\+\%(\h\w\+\_s\+\)\%(\.\h\w*\_s\+\)\?\)\@<=\h[^:]*
-match sintax_pat  .String contained        : \%(\%{sintax_command}\_s*\%(\h\w\+\_s*\)\?\%(\.\h\w*\_s*\)\?\%([^:]\+\)\?\)\@<=:\%(\n\%(\n\|\S\)\@!\|.\)\+
+match sintax_pat  .String contained contains=sintax_comment       : \%(\%{sintax_command}\_s*\%(\h\w\+\_s*\)\?\%(\.\h\w*\_s*\)\?\%([^:]\+\)\?\)\@<=:\%(\n\%(\n\|\S\)\@!\|.\)\+
+match sintax_comment .Comment contained :\s\#\s*\S*$
