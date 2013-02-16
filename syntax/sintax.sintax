@@ -6,8 +6,9 @@ syntax sync fromstart
 partial syn_args : \%(\%(contain\%(s\|ed\%(in\)\?\)\|oneline\|fold\|display
                     \|extend\|conceal\%(ends\)\?\|cchar\|nextgroup
                     \|transparent\|skip\%(white\|nl\|empty\)\)\%(=\S*\)\?\)
-partial word              : \%(\<\h\w*\_s*\)
-partial keyword           : \%(\k\+\_s*\)
+partial whitespace : \%(\n\%(\n\|\S\)\@!\|\s\)
+partial word              : \%(\<\h\w*\%{whitespace}*\)
+partial keyword           : \%(\k\+\%{whitespace}*\)
 partial inline_pattern    : \%(:.*\)\?
 partial sintax_group_name : \%{word}
 partial highlight         : \%(\.\%{word}\)
@@ -26,27 +27,27 @@ match sintax_region_cmd        : ^\%(start\|skip\|end\)\>
 partial region_args     :  \%{sintax_group_name}\%{highlight}\%{sinargs}
 match sintax_name_line
   contained contains=sintax_command,sintax_syn_name,sintax_highlight :
-  ^name\_s\+\%{word}
-match sintax_case_line       contained contains=sintax_command,sintax_syn_name,sintax_highlight : ^case\_s\+\%{word}
-match sintax_spell_line      contained contains=sintax_command,sintax_syn_name,sintax_highlight : ^spell\_s\+\%{word}
+  ^name\%{whitespace}*\%{word}\?
+match sintax_case_line       contained contains=sintax_command,sintax_syn_name,sintax_highlight : ^case\%{whitespace}*\%{word}\?
+match sintax_spell_line      contained contains=sintax_command,sintax_syn_name,sintax_highlight : ^spell\%{whitespace}*\%{word}\?
 match sintax_keyword_line    contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_keyword :
-  ^keyword\_s\+
-  \%{sintax_group_name}
+  ^keyword\%{whitespace}*
+  \%{sintax_group_name}\?
   \%{highlight}\?
   \%{syn_args}*
   \%{keyword}*
 match sintax_partial_line
   contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_pat :
-  ^partial\_s\+\%{sintax_group_name}\%{pattern}
-match sintax_match_line      contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_args,sintax_pat : ^match\_s*\%{sintax_args}
-match sintax_region_line     contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_args : ^region\_s\+\%{region_args}
-match sintax_region_arg_line contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_pat : \%{sintax_region_cmd}\_s*\%{pattern}
+  ^partial\%{whitespace}*\%{sintax_group_name}\?\%{pattern}\?
+match sintax_match_line      contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_args,sintax_pat : ^match\%{whitespace}*\%{sintax_args}
+match sintax_region_line     contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_args : ^region\%{whitespace}*\%{region_args}
+match sintax_region_arg_line contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_pat : \%{sintax_region_cmd}\%{whitespace}*\%{pattern}
 match sintax_keyword .Special contained : \%{keyword}\+
 match sintax_command  .Identifier contained : ^\h\w*
-match sintax_syn_name  .PreProc contained : \%(\%{sintax_command}\_s\+\)\@<=\h\w\+
-match sintax_highlight  .Statement contained    : \%(\%{sintax_command}\_s\+\h\w\+\_s\+\)\@<=\.\h\w*
-match sintax_args  .Type contained  contains=sintax_args_name : \%(\%{sintax_command}\_s\+\%(\h\w\+\_s\+\)\%(\.\h\w*\_s\+\)\?\)\@<=\%(\%(\%{syn_args}\)\_s*\)\+
+match sintax_syn_name  .PreProc contained : \%(\%{sintax_command}\%{whitespace}\+\)\@<=\h\w\+
+match sintax_highlight  .Statement contained    : \%(\%{sintax_command}\%{whitespace}\+\h\w\+\%{whitespace}\+\)\@<=\.\h\w*
+match sintax_args  .Type contained  contains=sintax_args_name : \%(\%{sintax_command}\%{whitespace}\+\%(\h\w\+\%{whitespace}\+\)\%(\.\h\w*\%{whitespace}\+\)\?\)\@<=\%(\%(\%{syn_args}\)\%{whitespace}*\)\+
 match sintax_args_name .Normal contained contains=sintax_args_comma : =\@<=\S\+
 match sintax_args_comma .Type contained : ,
-match sintax_pat  .String contained contains=sintax_comment       : \%(\%{sintax_command}\_s*\%(\h\w\+\_s*\)\?\%(\.\h\w*\_s*\)\?\%([^:]\+\)\?\)\@<=\%{pattern}
+match sintax_pat  .String contained contains=sintax_comment       : \%(\%{sintax_command}\%{whitespace}*\%(\h\w\+\%{whitespace}*\)\?\%(\.\h\w*\%{whitespace}*\)\?\%([^:]\+\)\?\)\@<=\%{pattern}
 match sintax_comment .Comment contained :\s\#\s*\S*$
