@@ -74,6 +74,7 @@ function! Sintax(...)
   endfunc
 
   func sin.passthrough(line) dict
+    call self.prepare_sintax_line()
     call extend(self.out, [a:line])
   endfunc
 
@@ -128,6 +129,19 @@ function! Sintax(...)
     let self.input = type(a:file) == type('') ? readfile(a:file) : a:file
     let self.curline = 0
     let self.eof = len(self.input)
+    while self.curline < self.eof
+      let line = self.input[self.curline]
+      " pass through blank & comment lines (header)
+      if self.is_blank_or_comment(line)
+        if line != ''
+          call self.passthrough(line)
+        endif
+      else
+        break
+      endif
+      let self.curline += 1
+    endwhile
+    call self.append_preamble()
     while self.curline < self.eof
       let line = self.input[self.curline]
       " pass through blank, comment and explicit vim lines
@@ -237,9 +251,6 @@ function! Sintax(...)
   endfunc
 
   func sin.flush_old_sintax_line()
-    if empty(self.sinline)
-      return self.append_preamble()
-    endif
     let output = self.process_sintax_block()
     if empty(output)
       return
