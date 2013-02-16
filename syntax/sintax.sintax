@@ -28,13 +28,19 @@ match sintax_name_line
   ^name\_s\+\%{word}
 match sintax_case_line       contained contains=sintax_command,sintax_syn_name,sintax_highlight : ^case\_s\+\%{word}
 match sintax_spell_line      contained contains=sintax_command,sintax_syn_name,sintax_highlight : ^spell\_s\+\%{word}
-match sintax_keyword_line    contained contains=sintax_command,sintax_syn_name,sintax_highlight : ^keyword\_s\+\%{sintax_args}
+match sintax_keyword_line    contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_keyword :
+  ^keyword\_s\+
+  \%{sintax_group_name}
+  \%{highlight}\?
+  \%{syn_args}*
+  \%{keyword}*
 match sintax_partial_line
   contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_pat :
   ^partial\_s\+\%{sintax_group_name}\%{inline_pattern}
 match sintax_match_line      contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_args,sintax_pat : ^match\_s\+\%{sintax_args}
 match sintax_region_line     contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_args : ^region\_s\+\%{region_args}
 match sintax_region_arg_line contained contains=sintax_command,sintax_syn_name,sintax_highlight,sintax_pat : \%{sintax_region_cmd}\_s*\%{inline_pattern}
+match sintax_keyword .Special contained : \%{keyword}\+
 match sintax_command  .Identifier contained : ^\h\w*
 match sintax_syn_name  .PreProc contained : \%(\%{sintax_command}\_s\+\)\@<=\h\w\+
 match sintax_highlight  .Statement contained    : \%(\%{sintax_command}\_s\+\h\w\+\_s\+\)\@<=\.\h\w*
