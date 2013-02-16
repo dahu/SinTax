@@ -1,0 +1,4 @@
+syntax match foo /amultilinepattern/ some options
+:non sintax line second
+
+hi def link foo Bar

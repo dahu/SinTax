@@ -1,0 +1,2 @@
+match foo .Bar some options : a single line pattern
+:non sintax line second
