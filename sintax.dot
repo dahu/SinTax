@@ -27,7 +27,7 @@ digraph S {
     sin_parse                  ->  sin_passthrough;
     sin_parse                  ->  sin_process;
     sin_parse                  ->  sin_output;
-    sin_passthrough ;
+    sin_passthrough            ->  sin_prepare_sintax_line;
     sin_prepare_output ;
     sin_prepare_sintax_line    ->  sin_flush_old_sintax_line;
     sin_process                ->  sin_prepare_sintax_line;
