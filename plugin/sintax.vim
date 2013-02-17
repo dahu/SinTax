@@ -116,7 +116,7 @@ function! Sintax(...)
     " Find the last syntax region
     let i = (match(reverse(copy(self.out)), '^syntax region') * -1) -1
     " now append the piece.
-    let self.out[i] .= a:str
+    let self.out[i] .= substitute(a:str, '\s*$', '', '')
   endfunc
 
   func sin.parse(file, ...) dict

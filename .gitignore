@@ -1,2 +1,3 @@
 test/*.msgout
 test/*.out
+test/*.tap

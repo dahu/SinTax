@@ -1,0 +1,4 @@
+region foo .Bar some options :
+start: single line start pattern
+skip: single line skip pattern
+end: single line end pattern
