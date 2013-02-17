@@ -8,7 +8,6 @@ digraph S {
     sin_close_region           ->  sin_warn;
     sin_close_region           ->  sin_region_append;
     sin_erex_parse             ->  sin_lookup;
-    sin_flush_old_sintax_line  ->  sin_append_preamble;
     sin_flush_old_sintax_line  ->  sin_process_sintax_block;
     sin_flush_old_sintax_line  ->  sin_region_append;
     sin_highlight ;
@@ -17,12 +16,12 @@ digraph S {
     sin_is_sin_line            ->  sin_matches;
     sin_lookup ;
     sin_matches                ->  SinLookup;
-    sin_matches                ->  SinLookup;
-    sin_matchlist              ->  SinLookup;
-    sin_matchlist              ->  SinLookup;
     sin_output                 ->  sin_flush_old_sintax_line;
     sin_output                 ->  sin_region_append;
     sin_parse                  ->  sin_prepare_output;
+    sin_parse                  ->  sin_is_blank_or_comment;
+    sin_parse                  ->  sin_passthrough;
+    sin_parse                  ->  sin_append_preamble;
     sin_parse                  ->  sin_is_blank_or_comment;
     sin_parse                  ->  sin_is_sin_line;
     sin_parse                  ->  sin_passthrough;

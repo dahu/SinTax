@@ -79,13 +79,7 @@ function! Sintax(...)
   endfunc
 
   func sin.matches(string, pattern_name) dict
-    let p = SinLookup(a:pattern_name)
     return match(a:string, SinLookup(a:pattern_name)) != -1
-  endfunc
-
-  func sin.matchlist(string, pattern_name) dict
-    let p = SinLookup(a:pattern_name)
-    return matchlist(a:string, SinLookup(a:pattern_name))
   endfunc
 
   func sin.is_sin_line(line) dict
