@@ -29,10 +29,12 @@ set cpo&vim
 " Restore things when changing filetype.
 let b:undo_ftplugin = 'delcommand Sintax'
 
-function! s:write_output(bang, ...)
-  let dest = a:0 ? a:1 : expand('%:p:r') . '.vim'
-  if empty(glob(dest)) || bang
-    call writefile(split(Sintax().parse(getline(1,'$'), {'document' : 0}), "\n"), dest)
+function! s:write_output(bang, path)
+  let dest = !empty(a:path) ? a:path : expand('%:p:r') . '.vim'
+  if empty(glob(dest)) || a:bang
+    let lines = getline(1,'$')
+    let options = {'document' : 0}
+    call writefile(split(Sintax().parse(lines, options), "\n"), dest)
   else
     echohl ErrorMsg
     echom 'Sintax: A file already exists at ' . string(dest) . '. Add a bang (!) to overwrite it.'
