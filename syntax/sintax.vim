@@ -8,8 +8,8 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 syntax case ignore
-syntax sync fromstart
 syntax spell default
+syntax sync fromstart
 syntax region sintax_command_region start=/^\%(partial\|match\|keyword\|name\|case\|spell\)/ end=/\n\%(\n\|\S\|\%$\)\@=/ contains=sintax_name_line,sintax_case_line,sintax_spell_line,sintax_keyword_line,sintax_partial_line,sintax_match_line
 syntax region sintax_command_region start=/^region/ end=/\n\%(\n\|\%(start\|skip\|end\)\@!\S\|\%$\)\@=/ contains=sintax_region_line,sintax_region_arg_line
 syntax match sintax_region_cmd /^\%(start\|skip\|end\)\>/
